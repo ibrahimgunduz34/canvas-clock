@@ -1,6 +1,6 @@
 # Clock Animation Over Canvas
 
-![Screenshot](clock-view.png)
+![Screenshot](canvas-clock.gif)
 
 It's a demo project about creating animation on canvas.
 You can run the animation on your browser just by openning `index.html` file
