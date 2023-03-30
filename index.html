@@ -173,7 +173,7 @@
           const currentHour = currentTime.getHours();
           const currentSecond = currentTime.getSeconds();
 
-          const hoursInScale = currentHour * (24 / 60);
+          const hoursInScale = (currentHour % 12) * (60/12)
 
           // draw hour and minute hands
           drawHand(canvas, hoursInScale, LINE_WIDTH_HOUR,  MARGIN_HANDS_HOUR, COLOR_HANDS_HOUR);
