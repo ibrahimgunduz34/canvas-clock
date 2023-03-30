@@ -16,12 +16,14 @@
         // constants
         //---------------------------
         // colors
-        const COLOR_BG = '#000';
-        const COLOR_CIRCLE = '#F6F6F6';
+        const COLOR_BG = '#7D7F76';
+        const COLOR_CIRCLE = '#000';
+        const COLOR_CIRCLE_BG = '#D6C7AF';
         const COLOR_HANDS_HOUR = '#999';
         const COLOR_HANDS_MINUTE = '#666';
         const COLOR_HANDS_SECOND = '#FF0000';
-        const COLOR_NUMBERS = '#F3F3F3';
+        const COLOR_DAIL_LINES = '#333333';
+        const COLOR_NUMBERS = '#000';
 
         const HEIGHT = document.documentElement.clientHeight;
         const WIDTH = document.documentElement.clientWidth;
@@ -61,16 +63,16 @@
           context.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        function drawCircle(canvas, x1, y1, radius, fill) {
+        function drawCircle(canvas, x1, y1, radius, borderColor, fillColor) {
           const context = canvas.getContext('2d');
 
           context.beginPath();
-          context.strokeStyle = COLOR_CIRCLE;
+          context.strokeStyle = borderColor;
           context.lineWidth = LINE_WIDTH_BASE;
           context.arc(x1, y1, radius, 0, 2 * Math.PI);
 
-          if (fill) {
-            context.fillStyle = COLOR_CIRCLE;
+          if (fillColor) {
+            context.fillStyle = fillColor;
             context.fill();
           }
 
@@ -96,6 +98,7 @@
             const y2 = CENTER_Y + (Math.cos(radian) * (RADIUS - lineHeight));
             
             context.beginPath();
+            context.strokeStyle = COLOR_DAIL_LINES;
             context.moveTo(x1, y1);
             context.lineTo(x2, y2);
             context.stroke();
@@ -155,14 +158,14 @@
           // fill background
           drawBackgroundRectangle(canvas);
 
-          // draw numbers
-          drawNumbers(canvas);
-
           // draw the circle around the clock
-          drawCircle(canvas, CENTER_X, CENTER_Y, RADIUS);
+          drawCircle(canvas, CENTER_X, CENTER_Y, RADIUS, COLOR_CIRCLE, COLOR_CIRCLE_BG);
 
           // Draw clock dial 
           drawClockDial(canvas);
+
+          // draw numbers
+          drawNumbers(canvas);
 
           // Draw hands
           const currentTime = new Date();
@@ -178,7 +181,7 @@
           drawHand(canvas, currentSecond, LINE_WIDTH_SECOND, MARGIN_HANDS_SECOND, COLOR_HANDS_SECOND);
 
           // draw the circle at the center of the clock
-          drawCircle(canvas, CENTER_X, CENTER_Y, RADIUS * 0.02, true);
+          drawCircle(canvas, CENTER_X, CENTER_Y, RADIUS * 0.02, COLOR_CIRCLE, COLOR_CIRCLE);
 
           requestAnimationFrame(loop);
         }
