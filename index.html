@@ -1,0 +1,180 @@
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+      <script type="text/javascript">
+        //---------------------------
+        // constants
+        //---------------------------
+        // colors
+        const COLOR_BG = '#000';
+        const COLOR_CIRCLE = '#F6F6F6';
+        const COLOR_HANDS_HOUR = '#999';
+        const COLOR_HANDS_MINUTE = '#666';
+        const COLOR_HANDS_SECOND = '#FF0000';
+        const COLOR_NUMBERS = '#F3F3F3';
+
+        const HEIGHT = document.documentElement.clientHeight;
+        const WIDTH = document.documentElement.clientWidth;
+        const CENTER_X = WIDTH / 2;
+        const CENTER_Y = HEIGHT / 2;
+        
+        // Choose the smallest edge to calculate radius
+        const RADIUS_SCALE = Math.min(WIDTH, HEIGHT) 
+        
+        // Radius should be half of the smallest edge with some extra margin to 
+        // keep some spaces between the circle and the browser edges
+        const RADIUS = (RADIUS_SCALE / 2) - ((RADIUS_SCALE / 100) * 5); 
+        const LINE_WIDTH_BASE = RADIUS_SCALE / 300;
+        const LINE_WIDTH_FACTOR_SMALL = 3; // For minute indicators
+        const LINE_WIDTH_FACTOR_BIG = 7; // For minute indicators
+
+        // hands sizes
+        const LINE_WIDTH_MINUTE = LINE_WIDTH_BASE * 2.5
+        const LINE_WIDTH_HOUR = LINE_WIDTH_BASE * 4
+        const LINE_WIDTH_SECOND = LINE_WIDTH_BASE;
+
+        // Margins between the hand ends and the main circle
+        const MARGIN_HANDS_HOUR = LINE_WIDTH_BASE * 40;
+        const MARGIN_HANDS_MINUTE = LINE_WIDTH_BASE * 12;
+        const MARGIN_HANDS_SECOND = LINE_WIDTH_BASE * 20;
+
+        // 360 degree / 60 minutes
+        const UNIT_ANGLE = 360 / 60;
+
+        //---------------------------
+        // Functions
+        //---------------------------
+        function drawBackgroundRectangle(canvas) {
+          const context = canvas.getContext('2d');
+          context.fillStyle = COLOR_BG;
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawCircle(canvas, x1, y1, radius) {
+          const context = canvas.getContext('2d');
+
+          context.beginPath();
+          context.strokeStyle = COLOR_CIRCLE;
+          context.lineWidth = LINE_WIDTH_BASE;
+          context.arc(x1, y1, radius, 0, 2 * Math.PI);
+          context.stroke();
+        }
+
+        function drawClockDial(canvas) {
+          const context = canvas.getContext('2d');
+
+          // draw minute indicators
+          for(let i = 1; i <= 60; i++) {
+            const radian = i * UNIT_ANGLE * (Math.PI / 180);
+            
+            const lineHeightFactor = (i % 15) === 0 ? 
+              LINE_WIDTH_FACTOR_BIG : 
+              LINE_WIDTH_FACTOR_SMALL;
+            
+            const lineHeight = LINE_WIDTH_BASE * lineHeightFactor;
+
+            const x1 = CENTER_X + (Math.sin(radian) * RADIUS);
+            const y1 = CENTER_Y + (Math.cos(radian) * RADIUS);
+            const x2 = CENTER_X + (Math.sin(radian) * (RADIUS - lineHeight));
+            const y2 = CENTER_Y + (Math.cos(radian) * (RADIUS - lineHeight));
+            
+            context.beginPath();
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+          }
+        }
+
+        function drawHand(canvas, value, lineWidth, margin, color) {
+          const context = canvas.getContext('2d');
+
+          const radian = value * UNIT_ANGLE * (Math.PI / 180);
+
+          context.beginPath();
+          const x1 = CENTER_X;
+          const y1 = CENTER_Y;
+          const x2 = CENTER_X + (Math.sin(radian) * (RADIUS - margin));
+          const y2 = CENTER_Y - (Math.cos(radian) * (RADIUS - margin));
+          context.lineWidth = lineWidth;
+          context.strokeStyle = color;
+          context.moveTo(x1, y1);
+          context.lineTo(x2, y2);
+          context.stroke();
+        }
+
+        function drawNumbers(canvas) {
+          const context = canvas.getContext('2d');
+          context.font = '20px Arial';
+          context.strokeStyle = COLOR_NUMBERS;
+          const margin = LINE_WIDTH_BASE * 20;
+          const padding = 5; // to center the text          
+
+          for (let i = 1; i <= 60; i++) {
+            if (i % 5 == 0) {
+              const radian = i * UNIT_ANGLE * (Math.PI / 180);
+              const x = CENTER_X + (Math.sin(radian) * (RADIUS - margin)) - padding;
+              const y = CENTER_Y - (Math.cos(radian) * (RADIUS - margin)) + padding;
+
+              context.strokeText(i / 5, x, y);
+            }
+          }          
+        }
+        
+
+        //---------------------------
+        // Main
+        //---------------------------
+        // Create the canvas element
+        const canvas = document.createElement('canvas');
+        document.body.appendChild(canvas);
+
+        // setup canvas
+        canvas.height = HEIGHT;
+        canvas.width = WIDTH;
+
+        requestAnimationFrame(loop);
+
+        function loop(timestamp) {
+          // fill background
+          drawBackgroundRectangle(canvas);
+
+          // draw numbers
+          drawNumbers(canvas);
+
+          // draw the circle around the clock
+          drawCircle(canvas, CENTER_X, CENTER_Y, RADIUS);
+          
+          // draw the circle at the center of the clock
+          drawCircle(canvas, CENTER_X, CENTER_Y, RADIUS * 0.02);
+
+          // Draw clock dial 
+          drawClockDial(canvas);
+
+          // Draw hands
+          const currentTime = new Date();
+          const currentMinute = currentTime.getMinutes();
+          const currentHour = currentTime.getHours();
+          const currentSecond = currentTime.getSeconds();
+
+          const hoursInScale = currentHour * (24 / 60);
+
+          // draw hour and minute hands
+          drawHand(canvas, hoursInScale, LINE_WIDTH_HOUR,  MARGIN_HANDS_HOUR, COLOR_HANDS_HOUR);
+          drawHand(canvas, currentMinute, LINE_WIDTH_MINUTE, MARGIN_HANDS_MINUTE, COLOR_HANDS_MINUTE);
+          drawHand(canvas, currentSecond, LINE_WIDTH_SECOND, MARGIN_HANDS_SECOND, COLOR_HANDS_SECOND);
+          requestAnimationFrame(loop);
+        }
+      </script>
+  </body>
+</html>
